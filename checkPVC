@@ -31,6 +31,7 @@ function checkPvc(basIP)
 				p_next = info.indexOf("dot1q pvc on-demand",p+10);	
 				   if (p_next < 0)
 				   break;
+				   
 				
 				cur = info.indexOf("Share3.8M-Assure3M",p);
 				if (cur<0 || cur > p_next)
