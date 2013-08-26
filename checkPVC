@@ -1,0 +1,58 @@
+function checkPvc(basIP)
+{
+	
+	var j,re,arTmp,info,arTmp1,k;
+	crt.Screen.Send("show port \n");
+	info=crt.Screen.ReadString("#",5);	
+	
+	re = /\n/;//以行作为分割
+	arTmp = info.split(re);
+//	crt.Dialog.MessageBox(arTmp.length);
+	for (j = 0;j<arTmp.length;j++)
+	{ 		
+			re = /ethernet/;
+			if (!re.test(arTmp[j])) { continue; }
+			
+			re = /\s+/;
+			arTmp1 = arTmp[j].split(re);
+
+	    crt.Screen.Send("show config port " + arTmp1[0] +"\n");
+	    info=crt.Screen.ReadString("#",5);  
+	    
+	    var p,p_next;
+	    
+	    p_next = 0;
+	    while (true)
+	    {
+	    	var last, cur,pvc,q;
+	    	p = info.indexOf("dot1q pvc on-demand",p_next);
+					if(p<0)
+						break;
+				p_next = info.indexOf("dot1q pvc on-demand",p+10);	
+				   if (p_next < 0)
+				   break;
+				
+				cur = info.indexOf("Share3.8M-Assure3M",p);
+				if (cur<0 || cur > p_next)
+				{
+			 	 cur = info.indexOf("on-demand",p);
+			 	 last = cur;
+			 	 cur = info.indexOf("profile",last);
+			 	 pvc = info.substr(last+9, cur-last-9-1);	
+			 	 //pvc 处理，提取出外层vlan 和内层vlan
+			 	 re = /:/;
+			 	 if (!re.test(pvc))
+			 	 	{
+			 	 			continue;
+			 	 	}
+			 	 var arVlan;
+			 	 arVlan =  pvc.split(re);
+			 	 arVlan[0].Trim();
+			 	 arVlan[1].Trim();
+			 	 if (arVlan[0] > 1299 && arVlan[0] < 2251)
+			  	 logfile2.WriteLine(basIP+"\t"+arTmp1[0]+"\t"+arVlan[0] + "\t"+arVlan[1]);
+				}	      	
+	    }
+	    
+	}
+}
